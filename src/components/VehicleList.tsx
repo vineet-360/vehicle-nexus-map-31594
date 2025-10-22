@@ -1,9 +1,11 @@
 import { Vehicle, VehicleStatus } from '@/types/vehicle';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import StatusBadge from './StatusBadge';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
+import { ChevronDown } from 'lucide-react';
 
 interface VehicleListProps {
   vehicles: Vehicle[];
@@ -33,7 +35,7 @@ const VehicleList = ({
   };
 
   return (
-    <div className="h-full flex flex-col bg-card border-r border-border">
+    <div className="h-full flex flex-col bg-card border-l border-border">
       <div className="p-4 border-b border-border bg-card">
         <h2 className="text-xl font-bold text-card-foreground mb-4">Fleet Overview</h2>
         
@@ -76,40 +78,59 @@ const VehicleList = ({
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+      <div className="flex-1 overflow-y-auto p-4 space-y-2">
         {filteredVehicles.map((vehicle) => (
-          <Card
-            key={vehicle.id}
-            className={cn(
-              'p-3 cursor-pointer transition-all hover:shadow-md border',
-              selectedVehicle?.id === vehicle.id
-                ? 'border-primary bg-primary/5 shadow-md'
-                : 'border-border hover:border-primary/50'
-            )}
-            onClick={() => onSelectVehicle(vehicle)}
-          >
-            <div className="space-y-2">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="font-semibold text-card-foreground">{vehicle.name}</p>
-                  <p className="text-xs text-muted-foreground">{vehicle.plateNumber}</p>
+          <Collapsible key={vehicle.id}>
+            <Card
+              className={cn(
+                'transition-all border',
+                selectedVehicle?.id === vehicle.id
+                  ? 'border-primary bg-primary/5 shadow-md'
+                  : 'border-border hover:border-primary/50'
+              )}
+            >
+              <CollapsibleTrigger asChild>
+                <div className="flex items-center justify-between p-3 cursor-pointer hover:bg-accent/50 transition-colors">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <StatusBadge status={vehicle.status} showLabel={false} size="sm" />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-card-foreground truncate">{vehicle.name}</p>
+                      <p className="text-xs text-muted-foreground">{vehicle.plateNumber}</p>
+                    </div>
+                  </div>
+                  <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 data-[state=open]:rotate-180" />
                 </div>
-                <StatusBadge status={vehicle.status} showLabel={false} size="md" />
-              </div>
-
-              <div className="text-xs space-y-1">
-                <p className="text-muted-foreground">
-                  Driver: <span className="text-card-foreground font-medium">{vehicle.driver}</span>
-                </p>
-                <p className="text-muted-foreground">
-                  Speed: <span className="text-card-foreground font-medium">{vehicle.speed} mph</span>
-                </p>
-                <p className="text-muted-foreground">
-                  Updated: {formatDistanceToNow(new Date(vehicle.lastUpdate), { addSuffix: true })}
-                </p>
-              </div>
-            </div>
-          </Card>
+              </CollapsibleTrigger>
+              
+              <CollapsibleContent>
+                <div 
+                  className="px-3 pb-3 pt-1 space-y-2 border-t border-border/50 cursor-pointer hover:bg-accent/30 transition-colors"
+                  onClick={() => onSelectVehicle(vehicle)}
+                >
+                  <div className="text-xs space-y-1.5">
+                    <p className="text-muted-foreground">
+                      Driver: <span className="text-card-foreground font-medium">{vehicle.driver}</span>
+                    </p>
+                    <p className="text-muted-foreground">
+                      Speed: <span className="text-card-foreground font-medium">{vehicle.speed} mph</span>
+                    </p>
+                    <p className="text-muted-foreground">
+                      Updated: <span className="text-card-foreground font-medium">
+                        {formatDistanceToNow(new Date(vehicle.lastUpdate), { addSuffix: true })}
+                      </span>
+                    </p>
+                  </div>
+                  <Button 
+                    size="sm" 
+                    className="w-full mt-2"
+                    variant={selectedVehicle?.id === vehicle.id ? "default" : "outline"}
+                  >
+                    View on Map
+                  </Button>
+                </div>
+              </CollapsibleContent>
+            </Card>
+          </Collapsible>
         ))}
       </div>
     </div>

@@ -21,6 +21,13 @@ const Index = () => {
 
   return (
     <div className="h-full flex overflow-hidden">
+      <div className="flex-1">
+        <FleetMap
+          vehicles={vehicles}
+          selectedVehicle={selectedVehicle}
+          apiToken={mapboxToken}
+        />
+      </div>
       <div className="w-80 flex-shrink-0">
         <VehicleList
           vehicles={vehicles}
@@ -28,13 +35,6 @@ const Index = () => {
           onSelectVehicle={setSelectedVehicle}
           filterStatus={filterStatus}
           onFilterChange={setFilterStatus}
-        />
-      </div>
-      <div className="flex-1">
-        <FleetMap
-          vehicles={vehicles}
-          selectedVehicle={selectedVehicle}
-          apiToken={mapboxToken}
         />
       </div>
     </div>
