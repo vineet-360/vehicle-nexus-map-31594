@@ -12,11 +12,15 @@ const Index = () => {
   const [mapboxToken, setMapboxToken] = useState<string>('');
 
   if (!mapboxToken) {
-    return <MapboxTokenInput onTokenSubmit={setMapboxToken} />;
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <MapboxTokenInput onTokenSubmit={setMapboxToken} />
+      </div>
+    );
   }
 
   return (
-    <div className="h-screen flex overflow-hidden bg-background">
+    <div className="h-full flex overflow-hidden">
       <div className="w-80 flex-shrink-0">
         <VehicleList
           vehicles={vehicles}
