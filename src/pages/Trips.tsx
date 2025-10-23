@@ -17,8 +17,10 @@ export default function Trips() {
   const [timeRange, setTimeRange] = useState("today");
   const [selectedTrip, setSelectedTrip] = useState<string | null>(null);
   const [selectedEvents, setSelectedEvents] = useState<string[]>([]);
+  const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
   const [vehicleDropdownOpen, setVehicleDropdownOpen] = useState(false);
   const [eventsDropdownOpen, setEventsDropdownOpen] = useState(false);
+  const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
   const [currentView, setCurrentView] = useState("active");
 
   // Mock data
@@ -28,6 +30,11 @@ export default function Trips() {
     { id: "overspeeding", label: "Overspeeding", icon: AlertTriangle },
     { id: "idle", label: "Idle Time", icon: Clock },
     { id: "media", label: "Media Files", icon: Camera },
+  ];
+  const statusOptions = [
+    { id: "inprogress", label: "In Progress", icon: Play },
+    { id: "completed", label: "Completed", icon: FileText },
+    { id: "lasttrip", label: "Last Trip", icon: History },
   ];
   
   const activeTrips = [
@@ -54,6 +61,14 @@ export default function Trips() {
       prev.includes(eventId)
         ? prev.filter(e => e !== eventId)
         : [...prev, eventId]
+    );
+  };
+
+  const handleStatusToggle = (statusId: string) => {
+    setSelectedStatus(prev =>
+      prev.includes(statusId)
+        ? prev.filter(s => s !== statusId)
+        : [...prev, statusId]
     );
   };
 
@@ -114,7 +129,7 @@ export default function Trips() {
           <CardDescription>Select vehicles, time range, and events to filter</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label>Select Vehicles</Label>
               <Popover open={vehicleDropdownOpen} onOpenChange={setVehicleDropdownOpen}>
@@ -174,6 +189,79 @@ export default function Trips() {
                       />
                     </Badge>
                   ))}
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label>Trip Status</Label>
+              <Popover open={statusDropdownOpen} onOpenChange={setStatusDropdownOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full justify-between">
+                    {selectedStatus.length === 0 ? (
+                      "Select status..."
+                    ) : (
+                      <span className="truncate">
+                        {selectedStatus.length} status selected
+                      </span>
+                    )}
+                    <ChevronDown className="h-4 w-4 opacity-50 ml-2 flex-shrink-0" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[300px] p-3 bg-background z-50" align="start">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-sm font-medium">Select Status</p>
+                      {selectedStatus.length > 0 && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-auto p-1 text-xs"
+                          onClick={() => setSelectedStatus([])}
+                        >
+                          Clear all
+                        </Button>
+                      )}
+                    </div>
+                    {statusOptions.map(status => {
+                      const Icon = status.icon;
+                      return (
+                        <div key={status.id} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`status-${status.id}`}
+                            checked={selectedStatus.includes(status.id)}
+                            onCheckedChange={() => handleStatusToggle(status.id)}
+                          />
+                          <label 
+                            htmlFor={`status-${status.id}`} 
+                            className="text-sm cursor-pointer flex items-center flex-1"
+                          >
+                            <Icon className="h-4 w-4 mr-2 text-muted-foreground" />
+                            {status.label}
+                          </label>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </PopoverContent>
+              </Popover>
+              {selectedStatus.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {selectedStatus.map(statusId => {
+                    const status = statusOptions.find(s => s.id === statusId);
+                    if (!status) return null;
+                    const Icon = status.icon;
+                    return (
+                      <Badge key={statusId} variant="secondary" className="text-xs">
+                        <Icon className="h-3 w-3 mr-1" />
+                        {status.label}
+                        <X 
+                          className="h-3 w-3 ml-1 cursor-pointer" 
+                          onClick={() => handleStatusToggle(statusId)}
+                        />
+                      </Badge>
+                    );
+                  })}
                 </div>
               )}
             </div>
