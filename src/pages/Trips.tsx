@@ -16,14 +16,19 @@ export default function Trips() {
   const [selectedVehicles, setSelectedVehicles] = useState<string[]>([]);
   const [timeRange, setTimeRange] = useState("today");
   const [selectedTrip, setSelectedTrip] = useState<string | null>(null);
-  const [showStops, setShowStops] = useState(false);
-  const [showOverspeeding, setShowOverspeeding] = useState(false);
-  const [showIdleTime, setShowIdleTime] = useState(false);
-  const [showMediaFiles, setShowMediaFiles] = useState(false);
+  const [selectedEvents, setSelectedEvents] = useState<string[]>([]);
   const [vehicleDropdownOpen, setVehicleDropdownOpen] = useState(false);
+  const [eventsDropdownOpen, setEventsDropdownOpen] = useState(false);
+  const [currentView, setCurrentView] = useState("active");
 
   // Mock data
   const vehicles = ["VH-001", "VH-002", "VH-003", "VH-004", "VH-005"];
+  const eventOptions = [
+    { id: "stops", label: "Show Stops", icon: MapPin },
+    { id: "overspeeding", label: "Overspeeding", icon: AlertTriangle },
+    { id: "idle", label: "Idle Time", icon: Clock },
+    { id: "media", label: "Media Files", icon: Camera },
+  ];
   
   const activeTrips = [
     { id: "T001", vehicle: "VH-001", driver: "John Doe", origin: "New York", destination: "Boston", status: "In Progress", progress: 65, eta: "2h 15m" },
@@ -44,6 +49,14 @@ export default function Trips() {
     );
   };
 
+  const handleEventToggle = (eventId: string) => {
+    setSelectedEvents(prev =>
+      prev.includes(eventId)
+        ? prev.filter(e => e !== eventId)
+        : [...prev, eventId]
+    );
+  };
+
   const handleDownloadReport = () => {
     toast.success("Trip report downloaded successfully");
   };
@@ -54,13 +67,39 @@ export default function Trips() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h2 className="text-3xl font-bold">Trip Management</h2>
           <p className="text-muted-foreground">Manage and track vehicle trips</p>
         </div>
         
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          <Select value={currentView} onValueChange={setCurrentView}>
+            <SelectTrigger className="w-[200px] bg-background">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-background z-50">
+              <SelectItem value="active">
+                <div className="flex items-center">
+                  <Play className="h-4 w-4 mr-2" />
+                  Active Trips
+                </div>
+              </SelectItem>
+              <SelectItem value="history">
+                <div className="flex items-center">
+                  <History className="h-4 w-4 mr-2" />
+                  Trip History
+                </div>
+              </SelectItem>
+              <SelectItem value="analytics">
+                <div className="flex items-center">
+                  <BarChart3 className="h-4 w-4 mr-2" />
+                  Trip Analytics
+                </div>
+              </SelectItem>
+            </SelectContent>
+          </Select>
+          
           <Button variant="outline" onClick={handleDownloadReport}>
             <Download className="h-4 w-4 mr-2" />
             Download Report
@@ -170,165 +209,131 @@ export default function Trips() {
             </div>
           )}
 
-          <div className="space-y-3">
+          <div className="space-y-2">
             <Label>Event Filters</Label>
-            <div className="space-y-2">
-              <div className="flex items-center space-x-2 p-2 rounded-md hover:bg-accent">
-                <Checkbox
-                  id="show-stops"
-                  checked={showStops}
-                  onCheckedChange={(checked) => {
-                    setShowStops(checked as boolean);
-                    toast.success(`Show Stops ${checked ? 'enabled' : 'disabled'}`);
-                  }}
-                />
-                <label htmlFor="show-stops" className="text-sm cursor-pointer flex items-center flex-1">
-                  <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
-                  Show Stops
-                </label>
-              </div>
-
-              <div className="flex items-center space-x-2 p-2 rounded-md hover:bg-accent">
-                <Checkbox
-                  id="show-overspeeding"
-                  checked={showOverspeeding}
-                  onCheckedChange={(checked) => {
-                    setShowOverspeeding(checked as boolean);
-                    toast.success(`Overspeeding filter ${checked ? 'enabled' : 'disabled'}`);
-                  }}
-                />
-                <label htmlFor="show-overspeeding" className="text-sm cursor-pointer flex items-center flex-1">
-                  <AlertTriangle className="h-4 w-4 mr-2 text-muted-foreground" />
-                  Overspeeding
-                </label>
-              </div>
-
-              <div className="flex items-center space-x-2 p-2 rounded-md hover:bg-accent">
-                <Checkbox
-                  id="show-idle-time"
-                  checked={showIdleTime}
-                  onCheckedChange={(checked) => {
-                    setShowIdleTime(checked as boolean);
-                    toast.success(`Idle Time filter ${checked ? 'enabled' : 'disabled'}`);
-                  }}
-                />
-                <label htmlFor="show-idle-time" className="text-sm cursor-pointer flex items-center flex-1">
-                  <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
-                  Idle Time
-                </label>
-              </div>
-
-              <div className="flex items-center space-x-2 p-2 rounded-md hover:bg-accent">
-                <Checkbox
-                  id="show-media-files"
-                  checked={showMediaFiles}
-                  onCheckedChange={(checked) => {
-                    setShowMediaFiles(checked as boolean);
-                    toast.success(`Media Files filter ${checked ? 'enabled' : 'disabled'}`);
-                  }}
-                />
-                <label htmlFor="show-media-files" className="text-sm cursor-pointer flex items-center flex-1">
-                  <Camera className="h-4 w-4 mr-2 text-muted-foreground" />
-                  Media Files
-                </label>
-              </div>
-            </div>
-
-            {(showStops || showOverspeeding || showIdleTime || showMediaFiles) && (
-              <div className="flex flex-wrap gap-2 mt-2 pt-2 border-t">
-                <span className="text-xs text-muted-foreground">Active filters:</span>
-                {showStops && (
-                  <Badge variant="secondary" className="text-xs">
-                    <MapPin className="h-3 w-3 mr-1" />
-                    Stops
-                  </Badge>
-                )}
-                {showOverspeeding && (
-                  <Badge variant="secondary" className="text-xs">
-                    <AlertTriangle className="h-3 w-3 mr-1" />
-                    Overspeeding
-                  </Badge>
-                )}
-                {showIdleTime && (
-                  <Badge variant="secondary" className="text-xs">
-                    <Clock className="h-3 w-3 mr-1" />
-                    Idle Time
-                  </Badge>
-                )}
-                {showMediaFiles && (
-                  <Badge variant="secondary" className="text-xs">
-                    <Camera className="h-3 w-3 mr-1" />
-                    Media Files
-                  </Badge>
-                )}
+            <Popover open={eventsDropdownOpen} onOpenChange={setEventsDropdownOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-full justify-between">
+                  {selectedEvents.length === 0 ? (
+                    "Select event filters..."
+                  ) : (
+                    <span className="truncate">
+                      {selectedEvents.length} filter(s) selected
+                    </span>
+                  )}
+                  <ChevronDown className="h-4 w-4 opacity-50 ml-2 flex-shrink-0" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[300px] p-3 bg-background z-50" align="start">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm font-medium">Select Filters</p>
+                    {selectedEvents.length > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-auto p-1 text-xs"
+                        onClick={() => setSelectedEvents([])}
+                      >
+                        Clear all
+                      </Button>
+                    )}
+                  </div>
+                  {eventOptions.map(event => {
+                    const Icon = event.icon;
+                    return (
+                      <div key={event.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`event-${event.id}`}
+                          checked={selectedEvents.includes(event.id)}
+                          onCheckedChange={() => handleEventToggle(event.id)}
+                        />
+                        <label 
+                          htmlFor={`event-${event.id}`} 
+                          className="text-sm cursor-pointer flex items-center flex-1"
+                        >
+                          <Icon className="h-4 w-4 mr-2 text-muted-foreground" />
+                          {event.label}
+                        </label>
+                      </div>
+                    );
+                  })}
+                </div>
+              </PopoverContent>
+            </Popover>
+            {selectedEvents.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-2">
+                {selectedEvents.map(eventId => {
+                  const event = eventOptions.find(e => e.id === eventId);
+                  if (!event) return null;
+                  const Icon = event.icon;
+                  return (
+                    <Badge key={eventId} variant="secondary" className="text-xs">
+                      <Icon className="h-3 w-3 mr-1" />
+                      {event.label}
+                      <X 
+                        className="h-3 w-3 ml-1 cursor-pointer" 
+                        onClick={() => handleEventToggle(eventId)}
+                      />
+                    </Badge>
+                  );
+                })}
               </div>
             )}
           </div>
         </CardContent>
       </Card>
 
-      {/* Tabs for different views */}
-      <Tabs defaultValue="active" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="active">
-            <Play className="h-4 w-4 mr-2" />
-            Active Trips
-          </TabsTrigger>
-          <TabsTrigger value="history">
-            <History className="h-4 w-4 mr-2" />
-            Trip History
-          </TabsTrigger>
-          <TabsTrigger value="analytics">
-            <BarChart3 className="h-4 w-4 mr-2" />
-            Trip Analytics
-          </TabsTrigger>
-        </TabsList>
-
+      {/* Content based on selected view */}
+      <div className="space-y-4">
         {/* Active Trips */}
-        <TabsContent value="active" className="space-y-4">
-          <div className="grid gap-4">
-            {activeTrips.map(trip => (
-              <Card key={trip.id}>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="text-lg">{trip.vehicle} - {trip.driver}</CardTitle>
-                      <CardDescription>{trip.origin} → {trip.destination}</CardDescription>
+        {currentView === "active" && (
+          <div className="space-y-4">
+            <div className="grid gap-4">
+              {activeTrips.map(trip => (
+                <Card key={trip.id}>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="text-lg">{trip.vehicle} - {trip.driver}</CardTitle>
+                        <CardDescription>{trip.origin} → {trip.destination}</CardDescription>
+                      </div>
+                      <Badge className="bg-green-500">{trip.status}</Badge>
                     </div>
-                    <Badge className="bg-green-500">{trip.status}</Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Progress: {trip.progress}%</span>
-                    <span className="font-medium">ETA: {trip.eta}</span>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2">
-                    <div className="bg-primary h-2 rounded-full transition-all" style={{ width: `${trip.progress}%` }} />
-                  </div>
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline">
-                      <User className="h-4 w-4 mr-2" />
-                      Contact Driver
-                    </Button>
-                    <Button size="sm" variant="outline">
-                      <MapPin className="h-4 w-4 mr-2" />
-                      Track Live
-                    </Button>
-                    <Button size="sm" variant="outline">
-                      <FileText className="h-4 w-4 mr-2" />
-                      View Details
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Progress: {trip.progress}%</span>
+                      <span className="font-medium">ETA: {trip.eta}</span>
+                    </div>
+                    <div className="w-full bg-muted rounded-full h-2">
+                      <div className="bg-primary h-2 rounded-full transition-all" style={{ width: `${trip.progress}%` }} />
+                    </div>
+                    <div className="flex gap-2">
+                      <Button size="sm" variant="outline">
+                        <User className="h-4 w-4 mr-2" />
+                        Contact Driver
+                      </Button>
+                      <Button size="sm" variant="outline">
+                        <MapPin className="h-4 w-4 mr-2" />
+                        Track Live
+                      </Button>
+                      <Button size="sm" variant="outline">
+                        <FileText className="h-4 w-4 mr-2" />
+                        View Details
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
-        </TabsContent>
+        )}
 
         {/* Trip History */}
-        <TabsContent value="history" className="space-y-4">
-          <div className="grid gap-4">
+        {currentView === "history" && (
+          <div className="space-y-4">
+            <div className="grid gap-4">
             {tripHistory.map(trip => (
               <Card key={trip.id}>
                 <CardHeader>
@@ -494,10 +499,12 @@ export default function Trips() {
               </Card>
             ))}
           </div>
-        </TabsContent>
+          </div>
+        )}
 
         {/* Trip Analytics */}
-        <TabsContent value="analytics" className="space-y-4">
+        {currentView === "analytics" && (
+          <div className="space-y-4">
           <div className="grid gap-4 md:grid-cols-3">
             <Card>
               <CardHeader>
@@ -545,8 +552,9 @@ export default function Trips() {
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
-      </Tabs>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
