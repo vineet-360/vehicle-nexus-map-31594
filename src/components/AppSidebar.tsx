@@ -26,6 +26,7 @@ import {
   SidebarSeparator,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useUserRole, rolePermissions } from "@/contexts/UserRoleContext";
 
 const menuItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
@@ -41,7 +42,11 @@ const menuItems = [
 
 export function AppSidebar() {
   const { state } = useSidebar();
+  const { role } = useUserRole();
   const collapsed = state === "collapsed";
+  
+  const allowedPaths = rolePermissions[role];
+  const filteredMenuItems = menuItems.filter(item => allowedPaths.includes(item.url));
 
   return (
     <Sidebar collapsible="icon">
@@ -64,7 +69,7 @@ export function AppSidebar() {
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => (
+              {filteredMenuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild tooltip={item.title}>
                     <NavLink 
