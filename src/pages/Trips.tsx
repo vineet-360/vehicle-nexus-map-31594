@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Calendar, Download, Share2, Play, History, BarChart3, User, FileText, Clock, MapPin, AlertTriangle, Camera, Mail, MessageSquare, Bell } from "lucide-react";
+import { Calendar, Download, Share2, Play, History, BarChart3, User, FileText, Clock, MapPin, AlertTriangle, Camera, Mail, MessageSquare, Bell, ChevronDown, X } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -9,12 +9,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "sonner";
 
 export default function Trips() {
   const [selectedVehicles, setSelectedVehicles] = useState<string[]>([]);
   const [timeRange, setTimeRange] = useState("today");
   const [selectedTrip, setSelectedTrip] = useState<string | null>(null);
+  const [showStops, setShowStops] = useState(false);
+  const [showOverspeeding, setShowOverspeeding] = useState(false);
+  const [showIdleTime, setShowIdleTime] = useState(false);
+  const [showMediaFiles, setShowMediaFiles] = useState(false);
+  const [vehicleDropdownOpen, setVehicleDropdownOpen] = useState(false);
 
   // Mock data
   const vehicles = ["VH-001", "VH-002", "VH-003", "VH-004", "VH-005"];
@@ -66,33 +72,80 @@ export default function Trips() {
       <Card>
         <CardHeader>
           <CardTitle>Filters</CardTitle>
-          <CardDescription>Select vehicles and time range</CardDescription>
+          <CardDescription>Select vehicles, time range, and events to filter</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Select Vehicles</Label>
-              <div className="flex flex-wrap gap-2">
-                {vehicles.map(vehicle => (
-                  <div key={vehicle} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={vehicle}
-                      checked={selectedVehicles.includes(vehicle)}
-                      onCheckedChange={() => handleVehicleToggle(vehicle)}
-                    />
-                    <label htmlFor={vehicle} className="text-sm cursor-pointer">{vehicle}</label>
+              <Popover open={vehicleDropdownOpen} onOpenChange={setVehicleDropdownOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full justify-between">
+                    {selectedVehicles.length === 0 ? (
+                      "Select vehicles..."
+                    ) : (
+                      <span className="truncate">
+                        {selectedVehicles.length} vehicle(s) selected
+                      </span>
+                    )}
+                    <ChevronDown className="h-4 w-4 opacity-50 ml-2 flex-shrink-0" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[300px] p-3 bg-background z-50" align="start">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-sm font-medium">Select Vehicles</p>
+                      {selectedVehicles.length > 0 && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-auto p-1 text-xs"
+                          onClick={() => setSelectedVehicles([])}
+                        >
+                          Clear all
+                        </Button>
+                      )}
+                    </div>
+                    {vehicles.map(vehicle => (
+                      <div key={vehicle} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`vehicle-${vehicle}`}
+                          checked={selectedVehicles.includes(vehicle)}
+                          onCheckedChange={() => handleVehicleToggle(vehicle)}
+                        />
+                        <label 
+                          htmlFor={`vehicle-${vehicle}`} 
+                          className="text-sm cursor-pointer flex-1"
+                        >
+                          {vehicle}
+                        </label>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </PopoverContent>
+              </Popover>
+              {selectedVehicles.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {selectedVehicles.map(vehicle => (
+                    <Badge key={vehicle} variant="secondary" className="text-xs">
+                      {vehicle}
+                      <X 
+                        className="h-3 w-3 ml-1 cursor-pointer" 
+                        onClick={() => handleVehicleToggle(vehicle)}
+                      />
+                    </Badge>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">
               <Label>Time Range</Label>
               <Select value={timeRange} onValueChange={setTimeRange}>
-                <SelectTrigger>
+                <SelectTrigger className="bg-background">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-background z-50">
                   <SelectItem value="today">Today</SelectItem>
                   <SelectItem value="hour">Last Hour</SelectItem>
                   <SelectItem value="day">Last 24 Hours</SelectItem>
@@ -117,23 +170,99 @@ export default function Trips() {
             </div>
           )}
 
-          <div className="flex flex-wrap gap-2">
-            <Badge variant="outline" className="cursor-pointer hover:bg-accent">
-              <MapPin className="h-3 w-3 mr-1" />
-              Show Stops
-            </Badge>
-            <Badge variant="outline" className="cursor-pointer hover:bg-accent">
-              <AlertTriangle className="h-3 w-3 mr-1" />
-              Overspeeding
-            </Badge>
-            <Badge variant="outline" className="cursor-pointer hover:bg-accent">
-              <Clock className="h-3 w-3 mr-1" />
-              Idle Time
-            </Badge>
-            <Badge variant="outline" className="cursor-pointer hover:bg-accent">
-              <Camera className="h-3 w-3 mr-1" />
-              Media Files
-            </Badge>
+          <div className="space-y-3">
+            <Label>Event Filters</Label>
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2 p-2 rounded-md hover:bg-accent">
+                <Checkbox
+                  id="show-stops"
+                  checked={showStops}
+                  onCheckedChange={(checked) => {
+                    setShowStops(checked as boolean);
+                    toast.success(`Show Stops ${checked ? 'enabled' : 'disabled'}`);
+                  }}
+                />
+                <label htmlFor="show-stops" className="text-sm cursor-pointer flex items-center flex-1">
+                  <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
+                  Show Stops
+                </label>
+              </div>
+
+              <div className="flex items-center space-x-2 p-2 rounded-md hover:bg-accent">
+                <Checkbox
+                  id="show-overspeeding"
+                  checked={showOverspeeding}
+                  onCheckedChange={(checked) => {
+                    setShowOverspeeding(checked as boolean);
+                    toast.success(`Overspeeding filter ${checked ? 'enabled' : 'disabled'}`);
+                  }}
+                />
+                <label htmlFor="show-overspeeding" className="text-sm cursor-pointer flex items-center flex-1">
+                  <AlertTriangle className="h-4 w-4 mr-2 text-muted-foreground" />
+                  Overspeeding
+                </label>
+              </div>
+
+              <div className="flex items-center space-x-2 p-2 rounded-md hover:bg-accent">
+                <Checkbox
+                  id="show-idle-time"
+                  checked={showIdleTime}
+                  onCheckedChange={(checked) => {
+                    setShowIdleTime(checked as boolean);
+                    toast.success(`Idle Time filter ${checked ? 'enabled' : 'disabled'}`);
+                  }}
+                />
+                <label htmlFor="show-idle-time" className="text-sm cursor-pointer flex items-center flex-1">
+                  <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
+                  Idle Time
+                </label>
+              </div>
+
+              <div className="flex items-center space-x-2 p-2 rounded-md hover:bg-accent">
+                <Checkbox
+                  id="show-media-files"
+                  checked={showMediaFiles}
+                  onCheckedChange={(checked) => {
+                    setShowMediaFiles(checked as boolean);
+                    toast.success(`Media Files filter ${checked ? 'enabled' : 'disabled'}`);
+                  }}
+                />
+                <label htmlFor="show-media-files" className="text-sm cursor-pointer flex items-center flex-1">
+                  <Camera className="h-4 w-4 mr-2 text-muted-foreground" />
+                  Media Files
+                </label>
+              </div>
+            </div>
+
+            {(showStops || showOverspeeding || showIdleTime || showMediaFiles) && (
+              <div className="flex flex-wrap gap-2 mt-2 pt-2 border-t">
+                <span className="text-xs text-muted-foreground">Active filters:</span>
+                {showStops && (
+                  <Badge variant="secondary" className="text-xs">
+                    <MapPin className="h-3 w-3 mr-1" />
+                    Stops
+                  </Badge>
+                )}
+                {showOverspeeding && (
+                  <Badge variant="secondary" className="text-xs">
+                    <AlertTriangle className="h-3 w-3 mr-1" />
+                    Overspeeding
+                  </Badge>
+                )}
+                {showIdleTime && (
+                  <Badge variant="secondary" className="text-xs">
+                    <Clock className="h-3 w-3 mr-1" />
+                    Idle Time
+                  </Badge>
+                )}
+                {showMediaFiles && (
+                  <Badge variant="secondary" className="text-xs">
+                    <Camera className="h-3 w-3 mr-1" />
+                    Media Files
+                  </Badge>
+                )}
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
