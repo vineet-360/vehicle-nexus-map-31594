@@ -35,8 +35,8 @@ const VehicleDetailCard = ({ vehicle, onClose }: VehicleDetailCardProps) => {
   };
 
   const DetailRow = ({ label, value, icon: Icon }: { label: string; value: string | number; icon?: any }) => (
-    <div className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
-      <div className="flex items-center gap-2 text-muted-foreground text-sm">
+    <div className="flex items-center justify-between py-2 border-b border-gray-200 dark:border-gray-700 last:border-0">
+      <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 text-sm">
         {Icon && <Icon className="h-4 w-4" />}
         <span>{label}</span>
       </div>
@@ -45,8 +45,8 @@ const VehicleDetailCard = ({ vehicle, onClose }: VehicleDetailCardProps) => {
   );
 
   return (
-    <Card className="w-full shadow-2xl">
-      <CardHeader className="pb-3">
+    <Card className="w-full shadow-2xl max-h-[80vh] flex flex-col">
+      <CardHeader className="pb-3 flex-shrink-0">
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
@@ -63,29 +63,29 @@ const VehicleDetailCard = ({ vehicle, onClose }: VehicleDetailCardProps) => {
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-3 overflow-y-auto flex-1">
         {/* Quick Info */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="flex items-center gap-2 p-3 rounded-lg bg-accent/50">
+          <div className="flex items-center gap-2 p-3 rounded-lg bg-gray-100 dark:bg-gray-800">
             <Gauge className="h-5 w-5 text-primary" />
             <div>
-              <p className="text-xs text-muted-foreground">Speed</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400">Speed</p>
               <p className="text-sm font-bold">{vehicle.speed} mph</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 p-3 rounded-lg bg-accent/50">
+          <div className="flex items-center gap-2 p-3 rounded-lg bg-gray-100 dark:bg-gray-800">
             <Fuel className="h-5 w-5 text-primary" />
             <div>
-              <p className="text-xs text-muted-foreground">Fuel</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400">Fuel</p>
               <p className="text-sm font-bold">{vehicle.fuel}%</p>
             </div>
           </div>
         </div>
 
-        <div className="flex items-start gap-2 p-3 rounded-lg bg-accent/50">
+        <div className="flex items-start gap-2 p-3 rounded-lg bg-gray-100 dark:bg-gray-800">
           <MapPin className="h-4 w-4 text-primary mt-0.5" />
           <div className="flex-1">
-            <p className="text-xs text-muted-foreground">Location</p>
+            <p className="text-xs text-gray-600 dark:text-gray-400">Location</p>
             <p className="text-sm font-medium">{vehicle.location.address}</p>
           </div>
         </div>
@@ -121,7 +121,7 @@ const VehicleDetailCard = ({ vehicle, onClose }: VehicleDetailCardProps) => {
               <Activity className="h-4 w-4" />
               Device Information
             </h4>
-            <div className="bg-accent/30 rounded-lg p-3 space-y-1">
+            <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-3 space-y-1">
               <DetailRow label="ID" value={vehicle.id} />
               <DetailRow label="Device ID" value={vehicle.deviceId} />
               <DetailRow label="Protocol" value={vehicle.protocol} />
@@ -134,7 +134,7 @@ const VehicleDetailCard = ({ vehicle, onClose }: VehicleDetailCardProps) => {
               <Clock className="h-4 w-4" />
               Time & Status
             </h4>
-            <div className="bg-accent/30 rounded-lg p-3 space-y-1">
+            <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-3 space-y-1">
               <DetailRow 
                 label="Server Time" 
                 value={format(new Date(vehicle.serverTime), 'yyyy-MM-dd HH:mm:ss')} 
@@ -166,7 +166,7 @@ const VehicleDetailCard = ({ vehicle, onClose }: VehicleDetailCardProps) => {
               <Navigation className="h-4 w-4" />
               Location Details
             </h4>
-            <div className="bg-accent/30 rounded-lg p-3 space-y-1">
+            <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-3 space-y-1">
               <DetailRow label="Latitude" value={`${vehicle.location.lat.toFixed(6)}°`} />
               <DetailRow label="Longitude" value={`${vehicle.location.lng.toFixed(6)}°`} />
               <DetailRow label="Altitude" value={`${vehicle.altitude.toFixed(2)} ft`} />
@@ -182,7 +182,7 @@ const VehicleDetailCard = ({ vehicle, onClose }: VehicleDetailCardProps) => {
               <Gauge className="h-4 w-4" />
               Movement & Distance
             </h4>
-            <div className="bg-accent/30 rounded-lg p-3 space-y-1">
+            <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-3 space-y-1">
               <DetailRow label="Speed" value={`${vehicle.speed} mph`} />
               <DetailRow label="Odometer" value={`${vehicle.odometer.toLocaleString()} mi`} />
               <DetailRow label="Trip Odometer" value={vehicle.tripOdometer.toLocaleString()} />
@@ -202,7 +202,7 @@ const VehicleDetailCard = ({ vehicle, onClose }: VehicleDetailCardProps) => {
               <Fuel className="h-4 w-4" />
               Fuel & Engine
             </h4>
-            <div className="bg-accent/30 rounded-lg p-3 space-y-1">
+            <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-3 space-y-1">
               <DetailRow label="Fuel" value={`${vehicle.fuel}%`} />
               <DetailRow label="Fuel Consumption" value={vehicle.fuelConsumption.toLocaleString()} />
               <DetailRow 
@@ -222,7 +222,7 @@ const VehicleDetailCard = ({ vehicle, onClose }: VehicleDetailCardProps) => {
                 <Thermometer className="h-4 w-4" />
                 Temperature & Sensors
               </h4>
-              <div className="bg-accent/30 rounded-lg p-3 space-y-1">
+              <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-3 space-y-1">
                 {vehicle.coolantTemp && <DetailRow label="Coolant Temp" value={`${vehicle.coolantTemp}°F`} />}
                 {vehicle.intakeTemp && <DetailRow label="Intake Temp" value={`${vehicle.intakeTemp}°F`} />}
                 {vehicle.mapIntake && <DetailRow label="MAP Intake" value={vehicle.mapIntake} />}
@@ -236,7 +236,7 @@ const VehicleDetailCard = ({ vehicle, onClose }: VehicleDetailCardProps) => {
               <Activity className="h-4 w-4" />
               System Status
             </h4>
-            <div className="bg-accent/30 rounded-lg p-3 space-y-1">
+            <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-3 space-y-1">
               <DetailRow label="Status Code" value={vehicle.statusCode} />
               {vehicle.network && <DetailRow label="Network" value={vehicle.network} />}
               {vehicle.geofenceIds && <DetailRow label="Geofence IDs" value={vehicle.geofenceIds} />}
