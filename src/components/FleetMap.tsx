@@ -5,7 +5,7 @@ import { Vehicle } from '@/types/vehicle';
 import { Button } from '@/components/ui/button';
 import { Map as MapIcon, Satellite, Navigation, Layers } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import VehicleCard from './VehicleCard';
+import VehicleDetailCard from './VehicleDetailCard';
 
 interface FleetMapProps {
   vehicles: Vehicle[];
@@ -184,7 +184,7 @@ const FleetMap = ({ vehicles, selectedVehicle, apiToken }: FleetMapProps) => {
 
       {selectedVehicle && (
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10 w-96 max-w-[90vw]">
-          <VehicleCard vehicle={selectedVehicle} />
+          <VehicleDetailCard vehicle={selectedVehicle} />
         </div>
       )}
     </div>
